@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CArgo — Реальные цены доставки</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-shipping-fast"></i> CArgo</h1>
+            <p class="subtitle">Сравнение цен на доставку от ведущих транспортных компаний</p>
+        </header>
+
+        {% if error %}
+        <div class="error">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" id="calculationForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="from_city">
+                        <i class="fas fa-map-marker-alt"></i> Откуда
+                    </label>
+                    <select name="from_city" id="from_city" required class="select-with-icon">
+                        <option value="">Выберите город</option>
+                        {% for c in cities %}
+                            <option value="{{ c }}" {% if c == from_city %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="to_city">
+                        <i class="fas fa-map-marker-alt"></i> Куда
+                    </label>
+                    <select name="to_city" id="to_city" required class="select-with-icon">
+                        <option value="">Выберите город</option>
+                        {% for c in cities %}
+                            <option value="{{ c }}" {% if c == to_city %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">
+                        <i class="fas fa-weight-hanging"></i> Вес (кг)
+                    </label>
+                    <input type="number" name="weight" id="weight"
+                           value="{{ weight or 1 }}" min="1" max="100" step="0.1" required
+                           placeholder="Например: 5">
+                    <div class="hint">От 1 до 100 кг</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="box_size">
+                        <i class="fas fa-box"></i> Размер коробки
+                    </label>
+                    <select name="box_size" id="box_size">
+                        <option value="S" {% if box_size == "S" %}selected{% endif %}>S (30×20×15 см) — до 2 кг</option>
+                        <option value="M" {% if box_size == "M" or not box_size %}selected{% endif %}>M (40×30×25 см) — до 5 кг</option>
+                        <option value="L" {% if box_size == "L" %}selected{% endif %}>L (53×38×28 см) — до 10 кг</option>
+                        <option value="XL" {% if box_size == "XL" %}selected{% endif %}>XL (60×40×40 см) — до 15 кг</option>
+                        <option value="XXL" {% if box_size == "XXL" %}selected{% endif %}>XXL (80×60×50 см) — до 25 кг</option>
+                    </select>
+                    <div class="hint">Примерные габариты</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="declared">
+                        <i class="fas fa-shield-alt"></i> Объявленная ценность (₽)
+                    </label>
+                    <input type="number" name="declared" id="declared"
+                           value="{{ declared or 0 }}" min="0" max="100000" step="100"
+                           placeholder="0 = без страховки">
+                    <div class="hint">Страховая стоимость груза</div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>
+                        <i class="fas fa-truck"></i> Выберите транспортные компании
+                    </label>
+                    <div class="companies-checkboxes">
+                        {% for company in companies %}
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="companies" value="{{ company }}"
+                                   {% if company in selected_companies or not selected_companies %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            {{ company }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="calculate-btn">
+                <i class="fas fa-calculator"></i> Рассчитать стоимость
+            </button>
+        </form>
+
+        {% if offers %}
+        <div class="result">
+            <div class="result-header">
+                <h2><i class="fas fa-list-ol"></i> Лучшие предложения</h2>
+                <div class="result-summary">
+                    {{ offers|length }} предложений отсортировано по цене
+                </div>
+            </div>
+
+            <div class="offers-container">
+                {% for o in offers %}
+                <div class="offer" data-company="{{ o.company }}">
+                    <div class="offer-header">
+                        <div class="company-logo">
+                            {% if o.company == "СДЭК" %}
+                                <i class="fas fa-bolt" style="color: #3b82f6;"></i>
+                            {% elif o.company == "Boxberry" %}
+                                <i class="fas fa-berry" style="color: #f59e0b;"></i>
+                            {% elif o.company == "Почта России" %}
+                                <i class="fas fa-envelope" style="color: #ef4444;"></i>
+                            {% elif o.company == "Деловые Линии" %}
+                                <i class="fas fa-trailer" style="color: #10b981;"></i>
+                            {% else %}
+                                <i class="fas fa-train" style="color: #8b5cf6;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="offer-info">
+                            <div class="company-name">{{ o.company }}</div>
+                            <div class="tariff-name">{{ o.tariff }}</div>
+                        </div>
+                        <div class="offer-time">
+                            <i class="fas fa-clock"></i> {{ o.time }}
+                        </div>
+                    </div>
+
+                    <div class="offer-body">
+                        <div class="price-block">
+                            <span class="price">{{ o.price }} ₽</span>
+                            <div class="price-per-kg">{{ (o.price / weight)|round|int if weight > 0 else 0 }} ₽/кг</div>
+                        </div>
+
+                        <div class="offer-actions">
+                            <a href="{{ booking_links[o.company] }}"
+                               target="_blank"
+                               class="book-btn"
+                               data-company="{{ o.company }}"
+                               onclick="return confirmBooking(this);">
+                                <i class="fas fa-shopping-cart"></i> Оформить заказ
+                            </a>
+
+                            <button class="details-btn" onclick="showDetails('{{ o.company }}')">
+                                <i class="fas fa-info-circle"></i> Подробнее
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="result-footer">
+                <div class="best-offer">
+                    <i class="fas fa-trophy"></i>
+                    <strong>Лучшая цена:</strong> {{ offers[0].price }} ₽ ({{ offers[0].company }})
+                </div>
+                <div class="disclaimer">
+                    *Цены актуальны на момент расчета и могут изменяться транспортной компанией
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="features">
+            <h3><i class="fas fa-star"></i> Почему выбирают CArgo?</h3>
+            <div class="features-grid">
+                <div class="feature">
+                    <i class="fas fa-bolt"></i>
+                    <h4>Мгновенный расчет</h4>
+                    <p>Сравниваем цены в реальном времени с сайтов ТК</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Безопасная оплата</h4>
+                    <p>Оплата напрямую на сайте выбранной компании</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-history"></i>
+                    <h4>История запросов</h4>
+                    <p>Все ваши расчеты сохраняются в браузере</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        // Сохранение данных формы в localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('calculationForm');
+            const inputs = form.querySelectorAll('select, input[type="number"], input[type="checkbox"]');
+
+            // Восстановление данных из localStorage
+            const savedData = localStorage.getItem('cargo_form_data');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox') {
+                        input.checked = data[input.name] === 'true';
+                    } else if (data[input.name] !== undefined) {
+                        input.value = data[input.name];
+                    }
+                });
+            }
+
+            // Сохранение данных при изменении
+            inputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const formData = {};
+                    inputs.forEach(i => {
+                        if (i.type === 'checkbox') {
+                            formData[i.name] = i.checked;
+                        } else {
+                            formData[i.name] = i.value;
+                        }
+                    });
+                    localStorage.setItem('cargo_form_data', JSON.stringify(formData));
+                });
+            });
+
+            // Предотвращение отправки формы при одинаковых городах
+            form.addEventListener('submit', function(e) {
+                const fromCity = document.getElementById('from_city').value;
+                const toCity = document.getElementById('to_city').value;
+
+                if (fromCity && toCity && fromCity === toCity) {
+                    e.preventDefault();
+                    alert('Города отправления и назначения не могут совпадать!');
+                    return false;
+                }
+
+                // Сохраняем историю запросов
+                const requestData = {
+                    from: fromCity,
+                    to: toCity,
+                    weight: document.getElementById('weight').value,
+                    declared: document.getElementById('declared').value,
+                    timestamp: new Date().toISOString()
+                };
+
+                let history = JSON.parse(localStorage.getItem('cargo_history') || '[]');
+                history.unshift(requestData);
+                history = history.slice(0, 10); // Храним только 10 последних запросов
+                localStorage.setItem('cargo_history', JSON.stringify(history));
+            });
+        });
+
+        function confirmBooking(linkElement) {
+            const company = linkElement.getAttribute('data-company');
+            const fromCity = document.getElementById('from_city').value;
+            const toCity = document.getElementById('to_city').value;
+            const weight = document.getElementById('weight').value;
+            const declared = document.getElementById('declared').value;
+
+            const confirmed = confirm(
+                `Вы переходите на сайт ${company} для оформления заказа.\n\n` +
+                `Данные заказа:\n` +
+                `• Откуда: ${fromCity}\n` +
+                `• Куда: ${toCity}\n` +
+                `• Вес: ${weight} кг\n` +
+                `• Ценность: ${declared || 0} ₽\n\n` +
+                `Нажмите ОК для продолжения или Отмена для остаться здесь.`
+            );
+
+            if (confirmed) {
+                // Добавляем реферальную метку
+                const originalUrl = linkElement.href;
+                const refParam = originalUrl.includes('?') ? '&ref=cargo' : '?ref=cargo';
+                linkElement.href = originalUrl + refParam;
+
+                // Логируем переход
+                console.log(`User is booking with ${company}`);
+                return true;
+            }
+
+            return false;
+        }
+
+        function showDetails(company) {
+            alert(`Детальная информация о ${company}\n\n` +
+                  `Для получения точной информации о сроках и условиях доставки, ` +
+                  `рекомендуем перейти на сайт компании или связаться с их поддержкой.`);
+        }
+    </script>
+</body>
+</html>
