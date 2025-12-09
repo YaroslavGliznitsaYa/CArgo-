@@ -1,17 +1,16 @@
+// Переключатель темы (простой, меняет фон боди)
 function toggleTheme() {
     const body = document.body;
-    body.classList.toggle('dark');
-
-    const isDark = body.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    body.style.backgroundColor = body.style.backgroundColor === 'rgb(30, 30, 30)' ? '#0c73fe' : '#1e1e1e';
+    // Для полноценной темной темы нужно больше CSS, но для MVP оставим переключение фона
 }
 
-// Init theme
-document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+// Функция смены городов местами
+function swapCities() {
+    const fromSelect = document.querySelector('select[name="from_city"]');
+    const toSelect = document.querySelector('select[name="to_city"]');
 
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.body.classList.add('dark');
-    }
-});
+    const temp = fromSelect.value;
+    fromSelect.value = toSelect.value;
+    toSelect.value = temp;
+}

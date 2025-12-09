@@ -3,125 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CArgo — Поиск дешевой доставки</title>
+    <title>CArgo — Поиск дешёвой доставки</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header class="main-header">
-        <div class="theme-switch" onclick="toggleTheme()">
-            <i class="fas fa-adjust"></i>
+    <div class="hero-section">
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i> <span>Тёмная тема</span>
         </div>
-        <div class="logo-area">
-            <i class="fas fa-paper-plane"></i> CArgo
-        </div>
-        <p class="tagline">Агрегатор грузоперевозок. Сравниваем цены СДЭК, Boxberry, Почты и других.</p>
-    </header>
 
-    <div class="search-container">
-        <form method="post" class="search-form" id="searchForm">
+        <h1 class="hero-title">Тут находят дешёвую доставку</h1>
 
-            <div class="input-group">
-                <label>Откуда</label>
-                <select name="from_city" class="input-field" required>
-                    <option value="" disabled selected>Город..</option>
-                    {% for c in cities %}
-                    <option value="{{ c }}" {% if c == from_city %}selected{% endif %}>{{ c }}</option>
+        <form method="post" id="searchForm" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="search-wrapper">
+
+                <div class="search-group">
+                    <label>ОТКУДА</label>
+                    <select name="from_city" class="search-input" required>
+                        <option value="" disabled selected>Город..</option>
+                        {% for c in cities %}
+                        <option value="{{ c }}" {% if c == from_city %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="swap-btn" onclick="swapCities()">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+
+                <div class="search-group">
+                    <label>КУДА</label>
+                    <select name="to_city" id="to_city_select" class="search-input" required>
+                        <option value="" disabled selected>Город..</option>
+                        {% for c in cities %}
+                        <option value="{{ c }}" {% if c == to_city %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="search-group" style="flex: 0.6;">
+                    <label>ВЕС (КГ)</label>
+                    <input type="number" name="weight" value="{{ weight or 1 }}" min="0.1" max="100" step="0.1" class="search-input" required>
+                </div>
+
+                <div class="search-group" style="flex: 0.6;">
+                    <label>ЦЕННОСТЬ (₽)</label>
+                    <input type="number" name="declared" value="{{ declared or 0 }}" min="0" step="100" class="search-input" placeholder="0">
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Найти цены
+                </button>
+            </div>
+
+            <div class="form-footer">
+                <div class="checkbox-wrap">
+                    {% for company in companies %}
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="companies" value="{{ company }}"
+                        {% if company in selected_companies or not selected_companies %}checked{% endif %}>
+                        {{ company }}
+                    </label>
                     {% endfor %}
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>Куда</label>
-                <select name="to_city" class="input-field" required>
-                    <option value="" disabled selected>Город..</option>
-                    {% for c in cities %}
-                    <option value="{{ c }}" {% if c == to_city %}selected{% endif %}>{{ c }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="input-group" style="max-width: 120px;">
-                <label>Вес (кг)</label>
-                <input type="number" name="weight" value="{{ weight or 1 }}" min="0.1" max="100" step="0.1" class="input-field" required>
-            </div>
-
-            <div class="input-group" style="max-width: 150px;">
-                <label>Ценность (₽)</label>
-                <input type="number" name="declared" value="{{ declared or 0 }}" min="0" step="100" class="input-field">
-            </div>
-
-            <button type="submit" class="search-btn">
-                Найти цены
-            </button>
-
-            <div class="checkbox-group">
-                {% for company in companies %}
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-secondary);">
-                    <input type="checkbox" name="companies" value="{{ company }}"
-                    {% if company in selected_companies or not selected_companies %}checked{% endif %}>
-                    {{ company }}
-                </label>
-                {% endfor %}
+                </div>
+                <div class="footer-link">
+                    <i class="fas fa-share-alt"></i> Составить сложный маршрут
+                </div>
             </div>
         </form>
     </div>
 
-    <div class="results-container">
+    <div class="results-section">
         {% if error %}
         <div class="error-msg">
-            <i class="fas fa-exclamation-circle"></i> {{ error }}
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
         </div>
         {% endif %}
 
         {% if offers %}
-        <div class="results-header">
-            <h2>Найдено {{ offers|length }} вариантов</h2>
-            <span style="color: var(--text-secondary)">Маршрут: {{ from_city }} &rarr; {{ to_city }}</span>
-        </div>
-
-        {% for o in offers %}
-        <div class="ticket">
-            <div class="ticket-main">
-                <div class="company-logo-wrap">
-                    {% if o.company == "СДЭК" %} <i class="fas fa-bolt" style="color:#81c784"></i>
-                    {% elif o.company == "Boxberry" %} <i class="fas fa-box-open" style="color:#e57373"></i>
-                    {% elif o.company == "Почта России" %} <i class="fas fa-envelope" style="color:#64b5f6"></i>
-                    {% else %} <i class="fas fa-truck" style="color:#ffb74d"></i> {% endif %}
-                </div>
-                <div class="ticket-info">
-                    <h3>{{ o.company }}</h3>
-                    <div class="ticket-meta">
-                        <span>{{ o.tariff }}</span>
-                        <span><i class="far fa-clock"></i> {{ o.time }}</span>
-                        {% if o.badge %}
-                        <span class="badge">{{ o.badge }}</span>
-                        {% endif %}
+            {% for o in offers %}
+            <div class="offer-card">
+                <div class="offer-left">
+                    <div class="offer-logo">
+                        {% if o.company == "СДЭК" %} <i class="fas fa-bolt" style="color:#81c784"></i>
+                        {% elif o.company == "Boxberry" %} <i class="fas fa-box-open" style="color:#e57373"></i>
+                        {% elif o.company == "Почта России" %} <i class="fas fa-envelope" style="color:#64b5f6"></i>
+                        {% else %} <i class="fas fa-truck" style="color:#ffb74d"></i> {% endif %}
+                    </div>
+                    <div class="offer-info">
+                        <h3>{{ o.company }}</h3>
+                        <div class="offer-meta">
+                            {{ o.tariff }} • {{ o.time }}
+                            {% if o.badge %}
+                             • <span style="color: var(--avs-orange); font-weight: bold;">{{ o.badge }}</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                <div class="offer-right">
+                    <div class="price">{{ o.price }} ₽</div>
+                    <a href="{{ booking_links[o.company] }}" target="_blank" class="buy-button">
+                        Оформить
+                    </a>
+                </div>
             </div>
-            <div class="ticket-action">
-                <div class="price-tag">{{ o.price }} ₽</div>
-                <a href="{{ booking_links[o.company] }}"
-                   target="_blank"
-                   class="buy-btn"
-                   onclick="return confirmGo('{{ o.company }}')">
-                    Выбрать <i class="fas fa-chevron-right"></i>
-                </a>
-            </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
         {% endif %}
     </div>
 
     <script src="/static/script.js"></script>
-    <script>
-        function confirmGo(company) {
-            // Реальные сайты не любят iframe, поэтому открываем в новой вкладке с предупреждением
-            // alert("Вы будете перенаправлены на сайт " + company + " для оформления заказа.");
-            return true;
-        }
-    </script>
 </body>
 </html>
