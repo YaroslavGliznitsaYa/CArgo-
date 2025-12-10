@@ -12,7 +12,7 @@
 
     <div class="hero-section">
         <div class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-moon"></i> <span>Тёмная тема</span>
+            <i class="fas fa-moon"></i> <span>Светлая/Темная тема</span>
         </div>
 
         <h1 class="hero-title">Тут находят дешёвую доставку</h1>
@@ -22,7 +22,7 @@
 
                 <div class="search-group">
                     <label>ОТКУДА</label>
-                    <select name="from_city" class="search-input" required>
+                    <select name="from_city" id="from_city" class="search-input" required>
                         <option value="" disabled selected>Город..</option>
                         {% for c in cities %}
                         <option value="{{ c }}" {% if c == from_city %}selected{% endif %}>{{ c }}</option>
@@ -35,7 +35,7 @@
 
                 <div class="search-group">
                     <label>КУДА</label>
-                    <select name="to_city" id="to_city_select" class="search-input" required>
+                    <select name="to_city" id="to_city" class="search-input" required>
                         <option value="" disabled selected>Город..</option>
                         {% for c in cities %}
                         <option value="{{ c }}" {% if c == to_city %}selected{% endif %}>{{ c }}</option>
@@ -45,12 +45,12 @@
 
                 <div class="search-group" style="flex: 0.6;">
                     <label>ВЕС (КГ)</label>
-                    <input type="number" name="weight" value="{{ weight or 1 }}" min="0.1" max="100" step="0.1" class="search-input" required>
+                    <input type="number" name="weight" id="weight" value="{{ weight or 1 }}" min="0.1" max="100" step="0.1" class="search-input" required>
                 </div>
 
                 <div class="search-group" style="flex: 0.6;">
                     <label>ЦЕННОСТЬ (₽)</label>
-                    <input type="number" name="declared" value="{{ declared or 0 }}" min="0" step="100" class="search-input" placeholder="0">
+                    <input type="number" name="declared" id="declared" value="{{ declared or 0 }}" min="0" step="100" class="search-input" placeholder="0">
                 </div>
 
                 <button type="submit" class="submit-btn">
@@ -80,9 +80,7 @@
         <div class="error-msg">
             <i class="fas fa-exclamation-triangle"></i> {{ error }}
         </div>
-        {% endif %}
-
-        {% if offers %}
+        {% endif %}  {% if offers %}
             {% for o in offers %}
             <div class="offer-card">
                 <div class="offer-left">
@@ -104,7 +102,9 @@
                 </div>
                 <div class="offer-right">
                     <div class="price">{{ o.price }} ₽</div>
-                    <a href="{{ booking_links[o.company] }}" target="_blank" class="buy-button">
+                    <a href="#"
+                       onclick="return confirmBooking('{{ o.company }}', '{{ booking_links[o.company] }}')"
+                       class="buy-button">
                         Оформить
                     </a>
                 </div>

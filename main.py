@@ -26,6 +26,7 @@ def generate_booking_links(from_city: str, to_city: str, weight: float, declared
     w_g = int(weight * 1000)
 
     return {
+        # Ссылки ведут на калькуляторы (максимум, что можно без API)
         "СДЭК": "https://www.cdek.ru/ru/calculate",
         "Boxberry": "https://boxberry.ru/calculate_the_cost_of_sending_a_letter_or_a_parcel",
         "Почта России": f"https://www.pochta.ru/parcels?weight={w_g}&from={fc}&to={tc}",
@@ -35,6 +36,7 @@ def generate_booking_links(from_city: str, to_city: str, weight: float, declared
 
 def calculate_delivery(from_c, to_c, weight, declared, companies):
     offers = []
+    # Эвристика для симуляции расстояний
     base_dist_coef = 1.0
     if (from_c == "Москва" and to_c == "Санкт-Петербург") or (from_c == "Санкт-Петербург" and to_c == "Москва"):
         base_dist_coef = 0.8

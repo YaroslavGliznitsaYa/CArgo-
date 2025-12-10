@@ -1,19 +1,37 @@
 :root {
-    --avs-blue: #0c73fe;       /* Тот самый синий */
-    --avs-orange: #ff6d00;     /* Тот самый оранжевый */
+    /* --- Светлая тема (Aviasales) --- */
+    --avs-blue: #0c73fe;        /* Тот самый синий */
+    --avs-orange: #ff6d00;      /* Тот самый оранжевый (CTA) */
     --avs-orange-hover: #ff852a;
-    --text-dark: #222222;
-    --text-grey: #839097;
-    --bg-page: #f1f4f8;        /* Светло-серый фон для результатов */
+    --text-dark: #222222;       /* Основной текст */
+    --text-grey: #839097;       /* Вспомогательный текст */
+    --bg-page: #f1f4f8;         /* Светло-серый фон для результатов */
+    --card-bg: #ffffff;         /* Фон карточек/формы */
+    --border-color: #dfe5ec;    /* Разделители и границы */
+    --hover-bg: #f8fbfd;        /* Фон правой части карточки */
 }
 
+/* --- Темная тема --- */
+body.dark {
+    --avs-blue: #0056b3;        /* Более глубокий синий */
+    --avs-orange: #ff5722;
+    --avs-orange-hover: #e64a19;
+    --text-dark: #ffffff;
+    --text-grey: #a0aab5;
+    --bg-page: #101924;         /* Очень темный фон */
+    --card-bg: #1f2a36;         /* Темные карточки/форма */
+    --border-color: #384555;
+    --hover-bg: #2c3e50;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-    margin: 0;
-    padding: 0;
     font-family: 'Roboto', 'Inter', sans-serif;
-    background-color: var(--avs-blue); /* Весь фон синий по умолчанию */
+    background-color: var(--avs-blue);
     color: var(--text-dark);
     min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* --- Главный экран (Hero) --- */
@@ -24,6 +42,7 @@ body {
     flex-direction: column;
     align-items: center;
     position: relative;
+    transition: background-color 0.3s;
 }
 
 .hero-title {
@@ -37,14 +56,15 @@ body {
 
 /* --- Форма поиска (Единая полоса) --- */
 .search-wrapper {
-    background: #ffffff;
-    border-radius: 12px; /* Скругление как на скрине */
+    background: var(--card-bg);
+    border-radius: 12px;
     display: flex;
     width: 100%;
     max-width: 1160px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     position: relative;
-    padding: 6px; /* Небольшой отступ для рамки */
+    padding: 6px;
+    transition: background-color 0.3s;
 }
 
 /* Группы полей внутри полосы */
@@ -55,7 +75,9 @@ body {
     flex-direction: column;
     justify-content: center;
     padding: 5px 15px;
-    border-right: 1px solid #dfe5ec; /* Разделители */
+    border-right: 1px solid var(--border-color);
+    min-width: 150px;
+    transition: border-color 0.3s;
 }
 
 .search-group:last-of-type {
@@ -69,6 +91,7 @@ body {
     margin-bottom: 2px;
 }
 
+/* Стилизация Input и Select */
 .search-input {
     width: 100%;
     border: none;
@@ -79,9 +102,30 @@ body {
     background: transparent;
     padding: 5px 0;
     cursor: pointer;
+
+    /* Скрываем нативные стрелки и добавляем свою */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Добавляем стилизованную стрелку для SELECT */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    transition: color 0.3s;
 }
 
-/* Кнопка "Найти" - отдельно справа или внутри */
+/* Иконки для SELECT */
+.search-group select.search-input {
+    /* URL для светлой темы (серая стрелка) */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23839097%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%20011.414%201.414l-4%204a1%201%2001-1.414%200l-4-4a1%201%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
+}
+body.dark .search-group select.search-input {
+    /* URL для темной темы (светло-серая стрелка) */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23a0aab5%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%20011.414%201.414l-4%204a1%201%2001-1.414%200l-4-4a1%201%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
+}
+
+/* Кнопка "Найти" */
 .submit-btn {
     background-color: var(--avs-orange);
     color: white;
@@ -89,10 +133,10 @@ body {
     font-size: 18px;
     font-weight: 700;
     padding: 0 40px;
-    border-radius: 8px; /* Чуть меньше радиус, чтобы вписаться */
+    border-radius: 8px;
     cursor: pointer;
     transition: background 0.2s;
-    margin-left: 6px; /* Отступ от белой формы */
+    margin-left: 6px;
     white-space: nowrap;
 }
 
@@ -103,23 +147,24 @@ body {
 /* Кнопка смены мест (Swap) */
 .swap-btn {
     position: absolute;
-    left: 100%;
+    right: -14px;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     width: 28px;
     height: 28px;
-    background: white;
-    border: 1px solid #dfe5ec;
+    background: var(--avs-blue);
+    border: 3px solid var(--card-bg);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--avs-blue);
+    color: white;
     cursor: pointer;
     z-index: 5;
-    transition: transform 0.2s;
+    transition: transform 0.2s, background 0.3s, border-color 0.3s;
 }
-.swap-btn:hover { transform: translate(-50%, -50%) rotate(180deg); }
+.swap-btn:hover { transform: translateY(-50%) rotate(180deg); }
+
 
 /* Чекбоксы под формой */
 .form-footer {
@@ -132,41 +177,25 @@ body {
     font-size: 14px;
 }
 
-.checkbox-wrap {
-    display: flex;
-    gap: 20px;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    opacity: 0.9;
-}
-
-.checkbox-label:hover { opacity: 1; }
-
 .checkbox-label input[type="checkbox"] {
     accent-color: var(--avs-orange);
-    width: 16px;
-    height: 16px;
 }
 
 /* --- Секция результатов --- */
 .results-section {
     background-color: var(--bg-page);
     min-height: 400px;
-    border-radius: 30px 30px 0 0; /* Скругление перехода */
-    margin-top: -30px; /* Наезд на синий фон */
+    border-radius: 30px 30px 0 0;
+    margin-top: -30px;
     padding: 60px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.3s;
 }
 
 .offer-card {
-    background: white;
+    background: var(--card-bg);
     width: 100%;
     max-width: 900px;
     border-radius: 12px;
@@ -174,7 +203,7 @@ body {
     margin-bottom: 16px;
     display: flex;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
 }
 
 .offer-card:hover {
@@ -198,24 +227,32 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: #f5f7f9;
+    background: var(--hover-bg);
+    transition: background-color 0.3s;
 }
 
-.offer-info h3 { margin: 0 0 5px 0; font-size: 18px; }
+.offer-info h3 { margin: 0 0 5px 0; font-size: 18px; color: var(--text-dark); }
 .offer-meta { font-size: 14px; color: var(--text-grey); }
 
 .offer-right {
     width: 220px;
-    background: #f8fbfd;
+    background: var(--hover-bg);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px;
-    border-left: 1px dashed #dce2e6;
+    border-left: 1px dashed var(--border-color);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
-.price { font-size: 22px; font-weight: 700; color: var(--avs-blue); margin-bottom: 10px; }
+.price {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--avs-blue); /* Цена всегда яркая */
+    margin-bottom: 10px;
+    transition: color 0.3s;
+}
 
 .buy-button {
     background: var(--avs-orange);
@@ -226,42 +263,23 @@ body {
     font-weight: 600;
     transition: background 0.2s;
 }
-.buy-button:hover { background: #e65100; }
+.buy-button:hover { background: var(--avs-orange-hover); }
 
 .error-msg {
-    background: #fee;
-    color: #d32f2f;
+    background: #ffcdd2;
+    color: #c62828;
     padding: 15px 30px;
     border-radius: 8px;
     margin-bottom: 30px;
-    border: 1px solid #ffcdd2;
+    border: 1px solid #ef9a9a;
+}
+body.dark .error-msg {
+    background: #4e1919;
+    color: #ffcdd2;
+    border-color: #7f3232;
 }
 
-/* Мобильная адаптация */
-@media (max-width: 850px) {
-    .search-wrapper {
-        flex-direction: column;
-        padding: 10px;
-    }
-    .search-group {
-        border-right: none;
-        border-bottom: 1px solid #eee;
-        padding: 10px;
-    }
-    .submit-btn {
-        margin: 10px 0 0 0;
-        height: 50px;
-        width: 100%;
-    }
-    .swap-btn {
-        display: none; /* Скрываем своп на мобильных для простоты */
-    }
-    .offer-card { flex-direction: column; }
-    .offer-right { width: 100%; border-left: none; border-top: 1px dashed #ccc; flex-direction: row; justify-content: space-between; }
-    .price { margin-bottom: 0; }
-}
-
-/* Иконки переключателя темы */
+/* Переключатель темы */
 .theme-toggle {
     position: absolute;
     top: 20px;
@@ -275,4 +293,6 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: 500;
+    transition: background 0.3s;
 }
