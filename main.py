@@ -2,31 +2,36 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import requests
-from typing import Literal
-from datetime import datetime
+from typing import List
+import urllib.parse
 
 app = FastAPI(title="CArgo — Агрегатор доставки")
+
+# Статика и шаблоны
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-CITIES = [
-    "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Нижний Новгород",
-    "Красноярск", "Челябинск", "Омск", "Самара", "Ростов-на-Дону", "Уфа", "Краснодар", "Воронеж",
-    "Пермь", "Волгоград", "Саратов", "Тюмень", "Тольятти", "Ижевск", "Барнаул", "Иркутск",
-    "Ульяновск", "Хабаровск", "Владивосток", "Ярославль", "Махачкала", "Томск", "Оренбург",
-    "Кемерово", "Новокузнецк", "Рязань", "Астрахань", "Набережные Челны", "Пенза", "Липецк", "Киров"
+# Города
+TOP_CITIES = ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань"]
+CITIES = TOP_CITIES + [
+    "Нижний Новгород", "Краснодар", "Самара", "Ростов-на-Дону", "Уфа",
+    "Красноярск", "Пермь", "Воронеж", "Волгоград", "Саратов", "Тюмень",
+    "Челябинск", "Омск", "Ярославль", "Иркутск", "Владивосток", "Хабаровск"
 ]
 
+COMPANIES = ["СДЭК", "Boxberry", "Почта России", "Деловые Линии"]
 
-def generate_booking_links(from_city: str, to_city: str, weight: float, declared: int):
-    import urllib.parse
+
+def generate_booking_links(from_city: str, to_city: str, weight: float, declared: int) -> dict:
+    """
+    Генерация ссылок на калькуляторы перевозчиков.
+    Здесь пока без прямых API — ссылки ведут на их формы расчёта.
+    """
     fc = urllib.parse.quote(from_city)
     tc = urllib.parse.quote(to_city)
     w_g = int(weight * 1000)
 
     return {
-        # Ссылки ведут на калькуляторы (максимум, что можно без API)
         "СДЭК": "https://www.cdek.ru/ru/calculate",
         "Boxberry": "https://boxberry.ru/calculate_the_cost_of_sending_a_letter_or_a_parcel",
         "Почта России": f"https://www.pochta.ru/parcels?weight={w_g}&from={fc}&to={tc}",
@@ -34,15 +39,27 @@ def generate_booking_links(from_city: str, to_city: str, weight: float, declared
     }
 
 
-def calculate_delivery(from_c, to_c, weight, declared, companies):
-    offers = []
-    # Эвристика для симуляции расстояний
+def calculate_delivery(
+    from_c: str,
+    to_c: str,
+    weight: float,
+    declared: int,
+    companies: List[str]
+) -> List[dict]:
+    """
+    Эмуляция расчёта стоимости (эвристика).
+    Для реальных цен сюда можно будет подставить запросы к API ТК.
+    """
+    offers: List[dict] = []
+
+    # Коэффициент "расстояния"
     base_dist_coef = 1.0
     if (from_c == "Москва" and to_c == "Санкт-Петербург") or (from_c == "Санкт-Петербург" and to_c == "Москва"):
         base_dist_coef = 0.8
     elif "Владивосток" in [from_c, to_c] or "Хабаровск" in [from_c, to_c]:
         base_dist_coef = 2.5
 
+    # СДЭК
     if "СДЭК" in companies:
         base = 350 * base_dist_coef
         cost = int(base + (weight * 80) + (declared * 0.007))
@@ -54,6 +71,7 @@ def calculate_delivery(from_c, to_c, weight, declared, companies):
             "badge": "Быстро"
         })
 
+    # Boxberry
     if "Boxberry" in companies:
         base = 290 * base_dist_coef
         cost = int(base + (weight * 70) + (declared * 0.005))
@@ -65,6 +83,7 @@ def calculate_delivery(from_c, to_c, weight, declared, companies):
             "badge": "Выгодно"
         })
 
+    # Почта России
     if "Почта России" in companies:
         p_price = int(250 * base_dist_coef + weight * 50)
         offers.append({
@@ -75,6 +94,7 @@ def calculate_delivery(from_c, to_c, weight, declared, companies):
             "badge": None
         })
 
+    # Деловые Линии
     if "Деловые Линии" in companies:
         offers.append({
             "company": "Деловые Линии",
@@ -84,45 +104,69 @@ def calculate_delivery(from_c, to_c, weight, declared, companies):
             "badge": "Крупный груз"
         })
 
+    # Самое дешёвое — первым
     offers.sort(key=lambda x: x["price"])
     return offers
 
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "cities": sorted(CITIES),
-        "companies": ["СДЭК", "Boxberry", "Почта России", "Деловые Линии"]
-    })
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "cities": sorted(CITIES),
+            "companies": COMPANIES,
+            "selected_companies": [],
+            "from_city": "",
+            "to_city": "",
+            "weight": 1,
+            "declared": 0,
+            "offers": [],
+            "booking_links": {},
+            "error": None,
+        },
+    )
 
 
 @app.post("/", response_class=HTMLResponse)
-async def calc(request: Request,
-               from_city: str = Form(...),
-               to_city: str = Form(...),
-               weight: float = Form(...),
-               declared: int = Form(0),
-               companies: list = Form(["СДЭК", "Boxberry", "Почта России", "Деловые Линии"])):
-    offers = []
+async def calc(
+    request: Request,
+    from_city: str = Form(...),
+    to_city: str = Form(...),
+    weight: float = Form(...),
+    declared: int = Form(0),
+    companies: List[str] = Form(COMPANIES),
+):
     error = None
+    offers: List[dict] = []
+    links: dict = {}
+
     if from_city == to_city:
         error = "Выберите разные города!"
     else:
         offers = calculate_delivery(from_city, to_city, weight, declared, companies)
+        links = generate_booking_links(from_city, to_city, weight, declared)
 
-    links = generate_booking_links(from_city, to_city, weight, declared)
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "cities": sorted(CITIES),
+            "companies": COMPANIES,
+            "selected_companies": companies,
+            "from_city": from_city,
+            "to_city": to_city,
+            "weight": weight,
+            "declared": declared,
+            "offers": offers,
+            "booking_links": links,
+            "error": error,
+        },
+    )
 
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "cities": sorted(CITIES),
-        "companies": ["СДЭК", "Boxberry", "Почта России", "Деловые Линии"],
-        "selected_companies": companies,
-        "from_city": from_city,
-        "to_city": to_city,
-        "weight": weight,
-        "declared": declared,
-        "offers": offers,
-        "booking_links": links,
-        "error": error
-    })
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

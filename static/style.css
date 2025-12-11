@@ -1,30 +1,32 @@
 :root {
-    /* --- Светлая тема (Aviasales) --- */
-    --avs-blue: #0c73fe;        /* Тот самый синий */
-    --avs-orange: #ff6d00;      /* Тот самый оранжевый (CTA) */
+    --avs-blue: #0c73fe;
+    --avs-orange: #ff6d00;
     --avs-orange-hover: #ff852a;
-    --text-dark: #222222;       /* Основной текст */
-    --text-grey: #839097;       /* Вспомогательный текст */
-    --bg-page: #f1f4f8;         /* Светло-серый фон для результатов */
-    --card-bg: #ffffff;         /* Фон карточек/формы */
-    --border-color: #dfe5ec;    /* Разделители и границы */
-    --hover-bg: #f8fbfd;        /* Фон правой части карточки */
+    --text-dark: #222222;
+    --text-grey: #839097;
+    --bg-page: #f1f4f8;
+    --card-bg: #ffffff;
+    --border-color: #dfe5ec;
+    --hover-bg: #f8fbfd;
 }
 
-/* --- Темная тема --- */
 body.dark {
-    --avs-blue: #0056b3;        /* Более глубокий синий */
+    --avs-blue: #0056b3;
     --avs-orange: #ff5722;
     --avs-orange-hover: #e64a19;
     --text-dark: #ffffff;
     --text-grey: #a0aab5;
-    --bg-page: #101924;         /* Очень темный фон */
-    --card-bg: #1f2a36;         /* Темные карточки/форма */
+    --bg-page: #101924;
+    --card-bg: #1f2a36;
     --border-color: #384555;
     --hover-bg: #2c3e50;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
     font-family: 'Roboto', 'Inter', sans-serif;
@@ -34,7 +36,7 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* --- Главный экран (Hero) --- */
+/* Hero */
 .hero-section {
     background-color: var(--avs-blue);
     padding: 80px 20px 100px 20px;
@@ -54,7 +56,7 @@ body {
     line-height: 1.2;
 }
 
-/* --- Форма поиска (Единая полоса) --- */
+/* Search bar */
 .search-wrapper {
     background: var(--card-bg);
     border-radius: 12px;
@@ -67,7 +69,6 @@ body {
     transition: background-color 0.3s;
 }
 
-/* Группы полей внутри полосы */
 .search-group {
     flex: 1;
     position: relative;
@@ -91,7 +92,6 @@ body {
     margin-bottom: 2px;
 }
 
-/* Стилизация Input и Select */
 .search-input {
     width: 100%;
     border: none;
@@ -102,30 +102,24 @@ body {
     background: transparent;
     padding: 5px 0;
     cursor: pointer;
-
-    /* Скрываем нативные стрелки и добавляем свою */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-
-    /* Добавляем стилизованную стрелку для SELECT */
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 16px;
     transition: color 0.3s;
 }
 
-/* Иконки для SELECT */
 .search-group select.search-input {
-    /* URL для светлой темы (серая стрелка) */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23839097%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%20011.414%201.414l-4%204a1%201%2001-1.414%200l-4-4a1%201%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
 }
+
 body.dark .search-group select.search-input {
-    /* URL для темной темы (светло-серая стрелка) */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23a0aab5%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%20011.414%201.414l-4%204a1%201%2001-1.414%200l-4-4a1%201%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
 }
 
-/* Кнопка "Найти" */
+/* Submit button */
 .submit-btn {
     background-color: var(--avs-orange);
     color: white;
@@ -144,7 +138,7 @@ body.dark .search-group select.search-input {
     background-color: var(--avs-orange-hover);
 }
 
-/* Кнопка смены мест (Swap) */
+/* Swap */
 .swap-btn {
     position: absolute;
     right: -14px;
@@ -163,10 +157,12 @@ body.dark .search-group select.search-input {
     z-index: 5;
     transition: transform 0.2s, background 0.3s, border-color 0.3s;
 }
-.swap-btn:hover { transform: translateY(-50%) rotate(180deg); }
 
+.swap-btn:hover {
+    transform: translateY(-50%) rotate(180deg);
+}
 
-/* Чекбоксы под формой */
+/* Footer */
 .form-footer {
     max-width: 1160px;
     width: 100%;
@@ -177,11 +173,24 @@ body.dark .search-group select.search-input {
     font-size: 14px;
 }
 
+.checkbox-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .checkbox-label input[type="checkbox"] {
     accent-color: var(--avs-orange);
 }
 
-/* --- Секция результатов --- */
+.footer-link {
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Results */
 .results-section {
     background-color: var(--bg-page);
     min-height: 400px;
@@ -231,8 +240,16 @@ body.dark .search-group select.search-input {
     transition: background-color 0.3s;
 }
 
-.offer-info h3 { margin: 0 0 5px 0; font-size: 18px; color: var(--text-dark); }
-.offer-meta { font-size: 14px; color: var(--text-grey); }
+.offer-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: var(--text-dark);
+}
+
+.offer-meta {
+    font-size: 14px;
+    color: var(--text-grey);
+}
 
 .offer-right {
     width: 220px;
@@ -249,9 +266,14 @@ body.dark .search-group select.search-input {
 .price {
     font-size: 22px;
     font-weight: 700;
-    color: var(--avs-blue); /* Цена всегда яркая */
+    color: var(--avs-blue);
     margin-bottom: 10px;
     transition: color 0.3s;
+}
+
+/* в тёмной теме цена светлее */
+body.dark .price {
+    color: #e0e7ff;
 }
 
 .buy-button {
@@ -263,8 +285,17 @@ body.dark .search-group select.search-input {
     font-weight: 600;
     transition: background 0.2s;
 }
-.buy-button:hover { background: var(--avs-orange-hover); }
 
+.buy-button:hover {
+    background: var(--avs-orange-hover);
+}
+
+/* Cheapest highlight как в Aviasales */
+.cheapest-offer {
+    border: 2px solid #4caf50;
+}
+
+/* Error */
 .error-msg {
     background: #ffcdd2;
     color: #c62828;
@@ -273,13 +304,14 @@ body.dark .search-group select.search-input {
     margin-bottom: 30px;
     border: 1px solid #ef9a9a;
 }
+
 body.dark .error-msg {
     background: #4e1919;
     color: #ffcdd2;
     border-color: #7f3232;
 }
 
-/* Переключатель темы */
+/* Theme toggle */
 .theme-toggle {
     position: absolute;
     top: 20px;
@@ -295,4 +327,30 @@ body.dark .error-msg {
     gap: 8px;
     font-weight: 500;
     transition: background 0.3s;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Адаптив */
+@media (max-width: 900px) {
+    .search-wrapper {
+        flex-direction: column;
+    }
+    .search-group {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .search-group:last-of-type {
+        border-bottom: none;
+    }
+    .offer-card {
+        flex-direction: column;
+    }
+    .offer-right {
+        width: 100%;
+        border-left: none;
+        border-top: 1px dashed var(--border-color);
+    }
 }

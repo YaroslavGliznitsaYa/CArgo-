@@ -5,114 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CArgo — Поиск дешёвой доставки</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+          rel="stylesheet">
 </head>
 <body>
 
-    <div class="hero-section">
-        <div class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-moon"></i> <span>Светлая/Темная тема</span>
-        </div>
+<div class="hero-section">
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </div>
 
-        <h1 class="hero-title">Тут находят дешёвую доставку</h1>
+    <h1 class="hero-title">Тут находят дешёвую доставку</h1>
 
-        <form method="post" id="searchForm" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div class="search-wrapper">
+    <form method="post" id="searchForm"
+          style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div class="search-wrapper">
 
-                <div class="search-group">
-                    <label>ОТКУДА</label>
-                    <select name="from_city" id="from_city" class="search-input" required>
-                        <option value="" disabled selected>Город..</option>
-                        {% for c in cities %}
-                        <option value="{{ c }}" {% if c == from_city %}selected{% endif %}>{{ c }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="swap-btn" onclick="swapCities()">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                </div>
-
-                <div class="search-group">
-                    <label>КУДА</label>
-                    <select name="to_city" id="to_city" class="search-input" required>
-                        <option value="" disabled selected>Город..</option>
-                        {% for c in cities %}
-                        <option value="{{ c }}" {% if c == to_city %}selected{% endif %}>{{ c }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="search-group" style="flex: 0.6;">
-                    <label>ВЕС (КГ)</label>
-                    <input type="number" name="weight" id="weight" value="{{ weight or 1 }}" min="0.1" max="100" step="0.1" class="search-input" required>
-                </div>
-
-                <div class="search-group" style="flex: 0.6;">
-                    <label>ЦЕННОСТЬ (₽)</label>
-                    <input type="number" name="declared" id="declared" value="{{ declared or 0 }}" min="0" step="100" class="search-input" placeholder="0">
-                </div>
-
-                <button type="submit" class="submit-btn">
-                    Найти цены
-                </button>
-            </div>
-
-            <div class="form-footer">
-                <div class="checkbox-wrap">
-                    {% for company in companies %}
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="companies" value="{{ company }}"
-                        {% if company in selected_companies or not selected_companies %}checked{% endif %}>
-                        {{ company }}
-                    </label>
+            <div class="search-group">
+                <label>ОТКУДА</label>
+                <select name="from_city" id="from_city" class="search-input" required>
+                    <option value="" disabled {% if not from_city %}selected{% endif %}>Город..</option>
+                    {% for c in cities %}
+                    <option value="{{ c }}" {% if c == from_city %}selected{% endif %}>{{ c }}</option>
                     {% endfor %}
-                </div>
-                <div class="footer-link">
-                    <i class="fas fa-share-alt"></i> Составить сложный маршрут
+                </select>
+                <div class="swap-btn" onclick="swapCities()">
+                    <i class="fas fa-exchange-alt"></i>
                 </div>
             </div>
-        </form>
-    </div>
 
-    <div class="results-section">
-        {% if error %}
-        <div class="error-msg">
-            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+            <div class="search-group">
+                <label>КУДА</label>
+                <select name="to_city" id="to_city" class="search-input" required>
+                    <option value="" disabled {% if not to_city %}selected{% endif %}>Город..</option>
+                    {% for c in cities %}
+                    <option value="{{ c }}" {% if c == to_city %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="search-group" style="flex: 0.6;">
+                <label>ВЕС (КГ)</label>
+                <input type="number" name="weight" id="weight"
+                       value="{{ weight or 1 }}" min="0.1" max="100" step="0.1"
+                       class="search-input" required>
+            </div>
+
+            <div class="search-group" style="flex: 0.6%;">
+                <label>ЦЕННОСТЬ (₽)</label>
+                <input type="number" name="declared" id="declared"
+                       value="{{ declared or 0 }}" min="0" step="100"
+                       class="search-input" placeholder="0">
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Найти цены
+            </button>
         </div>
-        {% endif %}  {% if offers %}
-            {% for o in offers %}
-            <div class="offer-card">
-                <div class="offer-left">
-                    <div class="offer-logo">
-                        {% if o.company == "СДЭК" %} <i class="fas fa-bolt" style="color:#81c784"></i>
-                        {% elif o.company == "Boxberry" %} <i class="fas fa-box-open" style="color:#e57373"></i>
-                        {% elif o.company == "Почта России" %} <i class="fas fa-envelope" style="color:#64b5f6"></i>
-                        {% else %} <i class="fas fa-truck" style="color:#ffb74d"></i> {% endif %}
-                    </div>
-                    <div class="offer-info">
-                        <h3>{{ o.company }}</h3>
-                        <div class="offer-meta">
-                            {{ o.tariff }} • {{ o.time }}
-                            {% if o.badge %}
-                             • <span style="color: var(--avs-orange); font-weight: bold;">{{ o.badge }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
+
+        <div class="form-footer">
+            <div class="checkbox-wrap">
+                {% for company in companies %}
+                <label class="checkbox-label">
+                    <input type="checkbox" name="companies" value="{{ company }}"
+                        {% if company in selected_companies or not selected_companies %}checked{% endif %}>
+                    {{ company }}
+                </label>
+                {% endfor %}
+            </div>
+            <div class="footer-link">
+                <i class="fas fa-share-alt"></i> Составить сложный маршрут
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="results-section">
+    {% if error %}
+    <div class="error-msg">
+        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if offers %}
+        {% for o in offers %}
+        <div class="offer-card {% if loop.first %}cheapest-offer{% endif %}">
+            <div class="offer-left">
+                <div class="offer-logo">
+                    {% if o.company == "СДЭК" %}
+                    <i class="fas fa-bolt" style="color:#81c784"></i>
+                    {% elif o.company == "Boxberry" %}
+                    <i class="fas fa-box-open" style="color:#e57373"></i>
+                    {% elif o.company == "Почта России" %}
+                    <i class="fas fa-envelope" style="color:#64b5f6"></i>
+                    {% else %}
+                    <i class="fas fa-truck" style="color:#ffb74d"></i>
+                    {% endif %}
                 </div>
-                <div class="offer-right">
-                    <div class="price">{{ o.price }} ₽</div>
-                    <a href="#"
-                       onclick="return confirmBooking('{{ o.company }}', '{{ booking_links[o.company] }}')"
-                       class="buy-button">
-                        Оформить
-                    </a>
+                <div class="offer-info">
+                    <h3>{{ o.company }}</h3>
+                    <div class="offer-meta">
+                        {{ o.tariff }} • {{ o.time }}
+                        {% if o.badge %}
+                        • <span style="color: var(--avs-orange); font-weight: bold;">{{ o.badge }}</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            {% endfor %}
-        {% endif %}
-    </div>
+            <div class="offer-right">
+                <div class="price">{{ o.price }} ₽</div>
+                <a href="#"
+                   onclick="return confirmBooking('{{ o.company }}', '{{ booking_links[o.company] }}')"
+                   class="buy-button">
+                    Оформить
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
 
-    <script src="/static/script.js"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
